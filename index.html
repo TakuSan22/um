@@ -3,588 +3,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Futurista</title>
+    <title>Detector de Palabras Clave de Cámara</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        /* Estilos Generales */
         body {
-            font-family: ' futuristic', sans-serif; /* Fuente futurista */
-            margin: 0;
-            padding: 0;
-            background-color: #111; /* Fondo oscuro */
-            color: #eee; /* Texto claro */
-            line-height: 1.7;
+            font-family: 'Inter', sans-serif;
         }
-        @font-face {
-        font-family: 'futuristic';
-        src: url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+        #video-container {
+            width: 100%;
+            max-width: 640px;
+            margin: 2rem auto;
+            border: 2px solid #6b7280;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+            position: relative;
         }
-
-        header {
-            background: linear-gradient(to right, #663399, #33ccff); /* Gradiente morado/azul */
-            padding: 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
-        }
-
-        header h1 {
-            margin: 0;
-            flex: 1 1 100%;
-            text-align: center;
-            font-size: 2.5rem; /* Tamaño de fuente más grande */
-            letter-spacing: 0.1em;
-        }
-
-        header nav ul {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        header nav ul li {
-            margin: 0 1.5rem;
-        }
-
-        header nav ul li a {
-            color: #fff;
-            text-decoration: none;
-            font-weight: bold;
-            text-transform: uppercase;
-            font-size: 1.2rem;
-            transition: color 0.3s ease;
-            border-bottom: 2px solid transparent; /* Efecto de subrayado */
-            padding-bottom: 0.2rem;
-        }
-
-        header nav ul li a:hover {
-            color: #ffcc00; /* Amarillo brillante al pasar el mouse */
-            border-bottom-color: #ffcc00;
-        }
-
-        main {
-            padding: 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        h2 {
-            margin-bottom: 1.5rem;
-            text-align: center;
-            font-size: 2rem;
-            letter-spacing: 0.1em;
-            color: #ff9900; /* Naranja */
-            border-bottom: 2px solid #ff9900;
-            padding-bottom: 0.5rem;
-        }
-
-        form {
-            background-color: rgba(255, 255, 255, 0.1); /* Fondo semi-transparente */
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            max-width: 400px;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        form label {
+        #camara-video {
             display: block;
-            margin-bottom: 0.5rem;
-            font-weight: bold;
-            color: #fff;
-            font-size: 1.1rem;
-        }
-
-        form input, form textarea, form button {
-            margin-bottom: 1.5rem;
-            padding: 0.75rem;
-            border: 1px solid rgba(255, 255, 255, 0.3); /* Borde claro */
-            border-radius: 6px;
-            box-sizing: border-box;
             width: 100%;
-            background-color: rgba(255, 255, 255, 0.05); /* Fondo transparente */
-            color: #fff;
+            height: auto;
+        }
+        #video-canvas {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        #keyword-input {
+            margin: 1rem auto;
+            padding: 0.75rem 1rem;
+            border-radius: 0.375rem;
+            border: 1px solid #d1d5db;
+            width: 100%;
+            max-width: 320px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
             font-size: 1rem;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+        #keyword-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
         }
 
-        form textarea {
-            resize: vertical;
-        }
-
-        form button {
-            background: linear-gradient(to right, #00ffff, #00aaff); /* Gradiente cian */
-            color: #000;
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            font-weight: bold;
-            font-size: 1.2rem;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-        }
-
-        form button:hover {
-            background: linear-gradient(to right, #00aaff, #0077ff);
-            transform: scale(1.05);
-        }
-
-        #enviar-compra-btn {
-            background: linear-gradient(to right, #ffcc00, #ff9900); /* Gradiente amarillo/naranja */
-            color: #000;
+        #result-container {
+            margin: 1rem auto;
             padding: 1rem;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1.2rem;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            margin-top: 1.5rem;
+            border-radius: 0.5rem;
+            background-color: #f7fafc;
+            border: 1px solid #e2e8f0;
             width: 100%;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-        }
-
-        #enviar-compra-btn:hover {
-            background: linear-gradient(to right, #ff9900, #ff6600);
-            transform: scale(1.05);
-        }
-
-        #lista-carrito {
-            list-style: none;
-            padding: 0;
-            margin-bottom: 1.5rem;
-        }
-
-        #lista-carrito li {
-            background-color: rgba(255, 255, 255, 0.1);
-            padding: 1.2rem;
-            margin-bottom: 1rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(5px);
-        }
-
-        #lista-carrito li button {
-            background-color: #dc3545;
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            font-size: 1rem;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-        }
-
-        #lista-carrito li button:hover {
-            background-color: #c82333;
-            transform: scale(1.1);
-        }
-
-        #total-carrito {
-            font-size: 1.5rem;
-            font-weight: bold;
-            text-align: right;
-            color: #ffcc00;
-        }
-
-        ul#lista-usuarios {
-            list-style: none;
-            padding: 0;
-            margin-top: 1rem;
-        }
-
-        ul#lista-usuarios li {
-            background-color: rgba(255, 255, 255, 0.1);
-            padding: 1.2rem;
-            margin-bottom: 1rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-             border: 1px solid rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(5px);
-        }
-
-        ul#lista-usuarios li a {
-            color: #00ffff;
-            text-decoration: none;
-            font-weight: bold;
-            transition: color 0.3s ease;
-        }
-
-        ul#lista-usuarios li a:hover {
-            color: #00aaff;
-            text-decoration: underline;
-        }
-        .product-card {
-            background-color: rgba(255, 255, 255, 0.1);
-            padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            max-width: 640px;
             text-align: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+        }
+        #result-text {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1e293b;
         }
 
-        .product-card:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
-        }
-
-        .product-card h3 {
-            margin-top: 0;
-            font-size: 1.5rem;
-            color: #ffcc00;
-            margin-bottom: 1rem;
-        }
-
-        .product-card p {
-            font-size: 1.1rem;
-            color: #eee;
-            margin-bottom: 1.2rem;
-        }
-
-        .add-to-cart {
-            background: linear-gradient(to right, #00ff00, #00cc00);
-            color: #000;
-            border: none;
-            padding: 0.8rem 1.7rem;
-            border-radius: 6px;
+        .button {
+            display: block;
+            width: 100%;
+            max-width: 320px;
+            margin: 1rem auto;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 1rem;
             cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            font-weight: bold;
-            font-size: 1.1rem;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-            margin-top: 0.5rem;
+            border: none;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            text-align: center;
         }
 
-        .add-to-cart:hover {
-            background: linear-gradient(to right, #00cc00, #009900);
-            transform: scale(1.05);
+        .button:hover {
+            background-color: #45a049;
         }
+
+        .button:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.3);
+        }
+
+        #error-message {
+            color: red;
+            font-size: 1rem;
+            margin-top: 1rem;
+            text-align: center;
+        }
+
     </style>
 </head>
-<body>
-    <header>
-        <h1>Web Futurista</h1>
-        <nav>
-            <ul>
-                <li><a href="#inicio">Inicio</a></li>
-                <li><a href="#registro">Registro</a></li>
-                <li><a href="#login">Iniciar Sesión</a></li>
-                <li><a href="#perfil">Perfil</a></li>
-                <li><a href="#admin">Administración</a></li>
-                <li><a href="#carrito">Carrito</a></li>
-            </ul>
-        </nav>
-    </header>
-    <main>
-        <section id="inicio">
-            <h2>Productos Destacados</h2>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
-                <div class="product-card">
-                    <h3>Producto 1</h3>
-                    <p>Descripción del producto 1.</p>
-                    <p>$19.99</p>
-                    <button class="add-to-cart" data-product-id="1">Añadir al carrito</button>
-                </div>
-                <div class="product-card">
-                    <h3>Producto 2</h3>
-                    <p>Descripción del producto 2.</p>
-                    <p>$29.99</p>
-                    <button class="add-to-cart" data-product-id="2">Añadir al carrito</button>
-                </div>
-                 <div class="product-card">
-                    <h3>Producto 3</h3>
-                    <p>Descripción del producto 3.</p>
-                    <p>$25.99</p>
-                    <button class="add-to-cart" data-product-id="3">Añadir al carrito</button>
-                </div>
-            </div>
-        </section>
+<body class="bg-gray-100">
+    <div class="container mx-auto mt-8 p-4">
+        <h1 class="text-2xl font-semibold text-gray-800 text-center mb-4">Detector de Palabras Clave de Cámara</h1>
 
-        <section id="registro">
-            <h2>Registro de Usuario</h2>
-            <form id="registro-form">
-                <label for="nombre">Nombre:</label>
-                <input type="text" id="nombre" name="nombre" required>
-                <label for="apellido">Apellido:</label>
-                <input type="text" id="apellido" name="apellido" required>
-                <label for="dni">DNI:</label>
-                <input type="text" id="dni" name="dni" required>
-                <label for="telefono">Teléfono:</label>
-                <input type="tel" id="telefono" name="telefono" required>
-                <label for="usuario">Nombre de Usuario:</label>
-                <input type="text" id="usuario" name="usuario" required>
-                <label for="contrasena">Contraseña:</label>
-                <input type="password" id="contrasena" name="contrasena" required>
-                <button type="submit">Registrarse</button>
-            </form>
-            <p>¿Ya tienes una cuenta? <a href="#login">Iniciar Sesión</a></p>
-        </section>
+        <div id="video-container" class="bg-black">
+            <video id="camara-video" controls autoplay playsinline></video>
+            <canvas id="video-canvas"></canvas>
+        </div>
 
-        <section id="login">
-            <h2>Iniciar Sesión</h2>
-            <form id="login-form">
-                <label for="usuario">Nombre de Usuario:</label>
-                <input type="text" id="usuario-login" name="usuario" required>
-                <label for="contrasena">Contraseña:</label>
-                <input type="password" id="contrasena-login" name="contrasena" required>
-                <button type="submit">Iniciar Sesión</button>
-            </form>
-            <p>¿No tienes una cuenta? <a href="#registro">Regístrate aquí</a></p>
-            <h2>Iniciar Sesión como Administrador</h2>
-            <form id="admin-login-form">
-                <label for="admin_usuario">Usuario (admin):</label>
-                <input type="text" id="admin_usuario" name="admin_usuario" value="admin" readonly>
-                <label for="admin_contrasena">Contraseña (admin):</label>
-                <input type="password" id="admin_contrasena" name="admin_contrasena" value="admin" required>
-                <button type="submit">Iniciar Sesión como Administrador</button>
-            </form>
-        </section>
+        <input type="text" id="keyword-input" placeholder="Ingrese la palabra clave a buscar" class="focus:ring-2 focus:ring-blue-500">
+        <button id="start-detection" class="button bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+            Iniciar Detección
+        </button>
 
-        <section id="perfil">
-            <h2>Perfil de Usuario</h2>
-            <section id="datos-personales">
-                <h3>Datos Personales</h3>
-                <p>Nombre: <span id="nombre-usuario"></span></p>
-                <p>Apellido: <span id="apellido-usuario"></span></p>
-                <p>DNI: <span id="dni-usuario"></span></p>
-                <p>Teléfono: <span id="telefono-usuario"></span></p>
-            </section>
-            <section id="compras-realizadas">
-                <h3>Compras Realizadas</h3>
-                <ul>
-                    </ul>
-            </section>
-        </section>
+        <div id="result-container" class="mt-4 p-4 bg-gray-200 rounded-md">
+            <p id="result-text" class="text-gray-700">Ingrese una palabra clave y haga clic en Iniciar Detección</p>
+        </div>
+        <div id="error-message" class="text-red-500 text-center mt-4"></div>
+    </div>
 
-        <section id="admin">
-            <h2>Panel de Administración</h2>
-            <h2>Usuarios Registrados</h2>
-            <ul id="lista-usuarios">
-                </ul>
-
-            <h2>Agregar Nuevo Producto</h2>
-            <form id="agregar-producto-form">
-                <label for="nombre_producto">Nombre del Producto:</label>
-                <input type="text" id="nombre_producto" name="nombre_producto" required>
-                <label for="descripcion_producto">Descripción:</label>
-                <textarea id="descripcion_producto" name="descripcion_producto"></textarea>
-                <label for="precio_producto">Precio:</label>
-                <input type="number" id="precio_producto" name="precio_producto" step="0.01" required>
-                <button type="submit">Agregar Producto</button>
-            </form>
-
-            <h2>Gestión de Compras</h2>
-            <ul>
-                <li><a href="#">Compras Pendientes</a></li>
-                <li><a href="#">Compras Procesadas</a></li>
-            </ul>
-        </section>
-
-        <section id="carrito">
-            <h2>Carrito de Compras</h2>
-            <ul id="lista-carrito">
-                </ul>
-            <p>Total: <span id="total-carrito">0.00</span></p>
-            <button id="enviar-compra-btn">Enviar Solicitud de Compra</button>
-        </section>
-    </main>
     <script>
-document.addEventListener('DOMContentLoaded', () => {
-    // Simulación de datos de productos
-    const productos = [
-        { id: 1, nombre: 'Producto 1', precio: 19.99 },
-        { id: 2, nombre: 'Producto 2', precio: 29.99 },
-        { id: 3, nombre: 'Producto 3', precio: 25.99 },
-    ];
+        const videoElement = document.getElementById('camara-video');
+        const keywordInputElement = document.getElementById('keyword-input');
+        const resultTextElement = document.getElementById('result-text');
+        const startDetectionButton = document.getElementById('start-detection');
+        const errorMessageElement = document.getElementById('error-message');
+        const canvasElement = document.getElementById('video-canvas');
+        const canvasContext = canvasElement.getContext('2d');
 
-    // Carrito de compras simulado
-    let carrito = [];
+        let stream = null;
+        let isProcessing = false;
+        let videoWidth = 0;
+        let videoHeight = 0;
+        let palabraEncontrada = false;
+        let palabraClaveABuscar = ''; // Variable para almacenar la palabra clave a buscar
 
-    // Función para agregar un producto al carrito
-    function agregarAlCarrito(productoId) {
-        const producto = productos.find(p => p.id === productoId);
-        if (producto) {
-            carrito.push(producto);
-            actualizarCarrito();
-            alert(`Producto "${producto.nombre}" añadido al carrito.`);
+
+        // Función para iniciar la cámara
+        async function startCamera() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                videoElement.srcObject = stream;
+                errorMessageElement.textContent = '';
+            } catch (error) {
+                console.error('Error al acceder a la cámara:', error);
+                errorMessageElement.textContent = 'Error al acceder a la cámara. Asegúrate de que la cámara esté permitida y conectada.';
+            }
         }
-    }
 
-    // Función para eliminar un producto del carrito
-    function eliminarDelCarrito(index) {
-        carrito.splice(index, 1);
-        actualizarCarrito();
-    }
+        // Función para detener la cámara
+        function stopCamera() {
+            if (stream) {
+                const tracks = stream.getTracks();
+                tracks.forEach(track => track.stop());
+                videoElement.srcObject = null;
+            }
+            isProcessing = false;
+            startDetectionButton.textContent = 'Iniciar Detección';
+        }
 
-   // Función para actualizar la visualización del carrito
-function actualizarCarrito() {
-    const listaCarrito = document.getElementById('lista-carrito');
-    const totalCarritoElement = document.getElementById('total-carrito');
-    listaCarrito.innerHTML = ''; // Limpiar el contenido anterior
+        // Función para buscar la palabra clave (simulado)
+        function buscarPalabraClave(frame, keyword) {
+            console.log('Buscando la palabra clave:', keyword, 'en el frame:', frame);
 
-    let total = 0;
-    if (carrito.length === 0) {
-        listaCarrito.innerHTML = `<li style="text-align: center; color: #aaa;">No hay productos en el carrito.</li>`;
-        totalCarritoElement.textContent = '0.00';
-    } else {
-        carrito.forEach((producto, index) => {
-            const listItem = document.createElement('li');
-            listItem.innerHTML = `
-                <span>${producto.nombre} - $${producto.precio.toFixed(2)}</span>
-                <button data-index="${index}">Eliminar</button>
-            `;
-            listaCarrito.appendChild(listItem);
-            total += producto.precio;
-        });
-        totalCarritoElement.textContent = total.toFixed(2);
-    }
+            const resultados = [
+                { palabra: 'ejemplo', renglon: 10 },
+                { palabra: 'texto', renglon: 25 },
+                { palabra: 'clave', renglon: 42 },
+                { palabra: keyword, renglon: Math.floor(Math.random() * 50) + 1 }
+            ];
 
+            const palabraEncontradaLocal = resultados.find(resultado => resultado.palabra === keyword);
 
-    // Agregar event listeners a los botones de eliminar
-    const botonesEliminar = listaCarrito.querySelectorAll('button');
-    botonesEliminar.forEach(boton => {
-        boton.addEventListener('click', () => {
-            const index = boton.dataset.index;
-            eliminarDelCarrito(index);
-        });
-    });
-}
-
-
-    // Event listeners para botones de "Añadir al carrito"
-    const botonesAgregar = document.querySelectorAll('.add-to-cart');
-    botonesAgregar.forEach(boton => {
-        boton.addEventListener('click', () => {
-            const productoId = parseInt(boton.dataset.productId);
-            agregarAlCarrito(productoId);
-        });
-    });
-
-    // Event listener para el botón de "Enviar Solicitud de Compra"
-    const botonEnviarCompra = document.getElementById('enviar-compra-btn');
-    if (botonEnviarCompra) {
-        botonEnviarCompra.addEventListener('click', () => {
-            if (carrito.length > 0) {
-                alert('Solicitud de compra enviada. (Simulado)');
-                carrito = [];
-                actualizarCarrito();
+            if (palabraEncontradaLocal) {
+                return { encontrado: true, renglon: palabraEncontradaLocal.renglon };
             } else {
-                alert('El carrito está vacío. Agregue productos antes de enviar la solicitud.');
+                return { encontrado: false, renglon: -1 };
             }
+        }
 
-        });
-    }
+        // Función para procesar cada fotograma del video
+        function processVideoFrame() {
+            if (!isProcessing || palabraEncontrada) return;
 
+            try {
+                canvasContext.drawImage(videoElement, 0, 0, videoWidth, videoHeight);
+                const imageData = canvasContext.getImageData(0, 0, videoWidth, videoHeight);
+                const frame = imageData;
 
+                const resultadoBusqueda = buscarPalabraClave(frame, palabraClaveABuscar); // Usa la palabra clave almacenada
+                if (resultadoBusqueda.encontrado) {
+                    palabraEncontrada = true;
+                    resultTextElement.textContent = `Palabra clave "${palabraClaveABuscar}" encontrada en el renglón ${resultadoBusqueda.renglon}.`;
+                } else {
+                    resultTextElement.textContent = `Palabra clave "${palabraClaveABuscar}" no encontrada en el frame actual.`;
+                    requestAnimationFrame(processVideoFrame);
+                }
+            } catch (error) {
+                console.error('Error al procesar el fotograma del video:', error);
+                errorMessageElement.textContent = 'Error al procesar el video. Por favor, reinicie la detección.';
+                stopCamera();
+            }
+        }
 
-    // Simulación de registro de usuario
-    const registroForm = document.getElementById('registro-form');
-    if (registroForm) {
-        registroForm.addEventListener('submit', (event) => {
-            event.preventDefault();
-            const nombre = document.getElementById('nombre').value;
-            const apellido = document.getElementById('apellido').value;
-            const usuario = document.getElementById('usuario').value;
-            const contrasena = document.getElementById('contrasena').value;
+        // Evento para iniciar/detener la detección de palabras clave
+        startDetectionButton.addEventListener('click', () => {
+            if (!isProcessing) {
+                palabraClaveABuscar = keywordInputElement.value.trim().toLowerCase(); // Obtiene la palabra clave del input
+                if (!palabraClaveABuscar) {
+                    resultTextElement.textContent = 'Por favor, ingrese una palabra clave para buscar.';
+                    return;
+                }
 
-            if (nombre && apellido && usuario && contrasena) {
-                alert(`Registro exitoso para ${usuario}! (Simulado)`);
-                window.location.href = '#login';
+                startCamera();
+                isProcessing = true;
+                palabraEncontrada = false;
+                startDetectionButton.textContent = 'Detener Detección';
+                videoElement.addEventListener('loadedmetadata', () => {
+                    videoWidth = videoElement.videoWidth;
+                    videoHeight = videoElement.videoHeight;
+                    canvasElement.width = videoWidth;
+                    canvasElement.height = videoHeight;
+                    processVideoFrame();
+                });
             } else {
-                alert('Por favor, complete todos los campos.');
+                stopCamera();
+                resultTextElement.textContent = 'Detección detenida. Ingrese una palabra clave y haga clic en Iniciar Detección para comenzar de nuevo.';
             }
         });
-    }
 
-    // Simulación de inicio de sesión
-    const loginForm = document.getElementById('login-form');
-    if (loginForm) {
-        loginForm.addEventListener('submit', (event) => {
-            event.preventDefault();
-            const usuario = document.getElementById('usuario-login').value;
-            const contrasena = document.getElementById('contrasena-login').value;
-
-            if (usuario === 'admin' && contrasena === 'admin') {
-                alert(`Inicio de sesión exitoso para ${usuario}! (Simulado)`);
-                window.location.href = '#admin';
-            } else if (usuario && contrasena) {
-                alert(`Inicio de sesión exitoso para ${usuario}! (Simulado)`);
-                window.location.href = '#perfil';
-            }
-             else {
-                alert('Por favor, ingrese usuario y contraseña.');
-            }
-        });
-    }
-
-    // Simulación de inicio de sesión de administrador
-    const adminLoginForm = document.getElementById('admin-login-form');
-    if (adminLoginForm) {
-        adminLoginForm.addEventListener('submit', (event) => {
-            event.preventDefault();
-            const usuario = document.getElementById('admin_usuario').value;
-            const contrasena = document.getElementById('admin_contrasena').value;
-            if (usuario && contrasena) {
-                alert(`Inicio de sesión exitoso para ${usuario}! (Simulado)`);
-                window.location.href = '#admin';
-            } else {
-                alert('Por favor, ingrese usuario y contraseña.');
-            }
-        });
-    }
-
-    // Simulación de agregar producto
-    const agregarProductoForm = document.getElementById('agregar-producto-form');
-    if (agregarProductoForm) {
-        agregarProductoForm.addEventListener('submit', (event) => {
-            event.preventDefault();
-            const nombreProducto = document.getElementById('nombre_producto').value;
-            const descripcionProducto = document.getElementById('descripcion_producto').value;
-            const precioProducto = document.getElementById('precio_producto').value;
-            if (nombreProducto && descripcionProducto && precioProducto) {
-                alert(`Producto "${nombreProducto}" agregado exitosamente. (Simulado)`);
-                 document.getElementById('nombre_producto').value = '';
-                  document.getElementById('descripcion_producto').value = '';
-                   document.getElementById('precio_producto').value = '';
-            } else {
-                alert('Por favor, complete todos los campos.');
-            }
-        });
-    }
-    // Datos de usuario simulados
-    const nombreUsuarioSpan = document.getElementById('nombre-usuario');
-    const apellidoUsuarioSpan = document.getElementById('apellido-usuario');
-    const dniUsuarioSpan = document.getElementById('dni-usuario');
-    const telefonoUsuarioSpan = document.getElementById('telefono-usuario');
-
-    if (nombreUsuarioSpan) {
-        nombreUsuarioSpan.textContent = "Usuario";
-    }
-    if (apellidoUsuarioSpan) {
-        apellidoUsuarioSpan.textContent = "Futurista";
-    }
-    if (dniUsuarioSpan) {
-        dniUsuarioSpan.textContent = "12345678F";
-    }
-    if (telefonoUsuarioSpan) {
-        telefonoUsuarioSpan.textContent = "+34 666 555 444";
-    }
-});
-</script>
+        // Iniciar la cámara automáticamente al cargar la página
+        startCamera();
+    </script>
 </body>
 </html>
